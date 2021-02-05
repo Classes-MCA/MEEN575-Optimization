@@ -33,18 +33,22 @@ p.addRequired('func')
 p.addRequired('x0')
 p.addRequired('tau')
 p.addParameter('Plot2DFunction',false)
+p.addParameter('XLims',[-5,5])
+p.addParameter('YLims',[-5,5])
 
 p.parse(func, x0, tau, varargin{:});
 
 Plot2DFunction = p.Results.Plot2DFunction;
+XLims = p.Results.XLims;
+YLims = p.Results.YLims;
 
 %----- CONTINUING THE FUNCTION -----%   
 
 % Plotting the 2-dimensional function, if desired
 if Plot2DFunction
     % Create a plot of the space
-    x1 = -10:0.1:10;
-    x2 = -10:0.1:10;
+    x1 = XLims(1):0.1:XLims(2);
+    x2 = YLims(1):0.1:YLims(2);
     plotSpace(x1,x2,func);
 end
 
@@ -52,7 +56,7 @@ end
 x0 = x0(:);
 
 % Basic line search
-x = x0;
+x = transpose(x0); % Making a row vector
 
 % Perform the optimization
 [xopt, fopt] = optimize(x,func,tau,Plot2DFunction);
@@ -62,81 +66,54 @@ end
 
 function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
 
-    alpha = 1; % Initial alpha value
-    xhist = x;
-    [f(1), df(1,:)] = func(x);
-    
-    dfold_normalized = [0;0];
+    f(1) = func(x); % Starting function value
 
-    for i = 2:1000
+    for i = 2:100
         
-        % Getting the direction
-        [f(i), dfnew] = func(x);
-    
-        dfnew_normalized = dfnew ./ norm(dfnew); % Normalizing the gradient
+        [f(i),p] = getFunctionInfo(x(i-1,:),func);
         
-        p = 0.5;
-        direction = -((1-p).*dfold_normalized + p.*dfnew_normalized);
-        xnew = linesearch(x, alpha, direction, func);
-
-        % Calculating the difference and setting history values
-        deltaX = xnew - x;
-        x = xnew;
-        xhist = [xhist, x];
-        
-        disp(['Iteration: ',num2str(i-1),', tol = ',num2str(norm(dfnew,inf)),', x = [',num2str(xnew(1)),', ',num2str(xnew(2)),']'])
+        x(i,:) = getNewPoint(x(i-1,:),p);
         
         if Plot2DFunction
             
-            subplot(1,2,1)
-            scatter3(xhist(1,:), xhist(2,:), f(:),...
-                    'MarkerEdgeColor','flat',...
-                    'MarkerFaceColor','red',...
-                    'CData',[1,0,0],...
-                    'SizeData',10)
-            line(xhist(1,:), xhist(2,:), f(:))
-                 
-            subplot(1,2,2)
-            scatter(xhist(1,:), xhist(2,:),...
-                    'MarkerEdgeColor','flat',...
-                    'MarkerFaceColor','red',...
-                    'CData',[1,0,0],...
-                    'SizeData',10)
-            line(xhist(1,:), xhist(2,:), f(:))
-            drawnow()
+            plotCurrentStatus(x,f)
             
         end
-
-        if norm(dfnew,inf) < tau
-            disp(['Finished after ',num2str(i-1),' iterations.'])
-            break
-        else
-            dfold_normalized = dfnew_normalized;
-        end
-
+        
     end
     
-    xopt = x;
-    fopt = func(x);
+    xopt = 0;
+    fopt = 0;
 
 end
 
-function xnew = linesearch(x, alpha, direction, func)
-    
-    direction = direction(:); % Force to be a column vector
+function [f,p] = getFunctionInfo(x,func)
 
-    for i = 50 % close to maximum precision (8.89 x 10^-16)
-        xnew = x + alpha .* direction;
-        
-        if func(xnew) < func(x)
-            return
-        elseif func(xnew) == func(x)
-            xnew = 5.*rand(2,1); % Just start somewhere else
-        else
-            alpha = alpha / 2; % Shrink the step size
-        end
-        
-    end
+    [f,df] = func(x);
+    
+    p = - df ./ norm(df);
+
+end
+
+function xnew = getNewPoint(x,p)
+    
+    x = x(:); % Make column vector
+
+    alpha = 0.1;
+
+    xnew = x + alpha*p;
+
+end
+
+function plotCurrentStatus(x,f)
+
+    subplot(1,2,1)
+    scatter3(x(:,1), x(:,2), f,...
+             'r.')
+         
+    subplot(1,2,2)
+    scatter(x(:,1), x(:,2),...
+            'r.')
 
 end
 

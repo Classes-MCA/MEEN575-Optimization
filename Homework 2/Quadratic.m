@@ -5,11 +5,17 @@ plotStyle('StandardStyle','SonicBoom')
 % Creating an intial guess
 x0 = [5,3];
 
-[xopt, fopt] = uncon(@quad,x0,1e-6,'Plot2DFunction',true);
+[xopt, fopt] = uncon(@quad,x0,1e-6,...
+               'Plot2DFunction',true,...
+               'XLims',[-10,10],...
+               'YLims',[-10,10]);
 
-%x0 = [2,2];
+x0 = [2,2];
 
-%[xopt, fopt] = uncon(@rosenbrock,x0,1e-6,'Plot2DFunction',true);
+[xopt, fopt] = uncon(@rosenbrock,x0,1e-6,...
+                     'Plot2DFunction',true,...
+                     'XLims',[-2,2],...
+                     'YLims',[-2,2]);
 
 %[f,df] = rosenbrock([1,1])
 
