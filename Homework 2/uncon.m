@@ -62,29 +62,29 @@ end
 
 function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
 
-    alpha = 1;
+    alpha = 1; % Initial alpha value
     xhist = x;
     [f(1), df(1,:)] = func(x);
     
-    df(1,:) = [0,0];
-    
-    %f(1,:) = df(1,:) ./ norm(df(1,:));
+    dfold_normalized = [0;0];
 
     for i = 2:1000
-    
-        [f(i), df(i,:)] = func(x);
-    
-        df(i,:) = df(i,:) ./ norm(df(i,:));
         
-        p = 0.1;
-        direction = -(1-p).*df(i-1,:) - p.*df(i,:);
+        % Getting the direction
+        [f(i), dfnew] = func(x);
+    
+        dfnew_normalized = dfnew ./ norm(dfnew); % Normalizing the gradient
+        
+        p = 0.5;
+        direction = -((1-p).*dfold_normalized + p.*dfnew_normalized);
         xnew = linesearch(x, alpha, direction, func);
 
+        % Calculating the difference and setting history values
         deltaX = xnew - x;
         x = xnew;
         xhist = [xhist, x];
         
-        disp(['Iteration: ',num2str(i-1),', tol = ',num2str(norm(df(i,:),inf)),', x = [',num2str(xnew(1)),', ',num2str(xnew(2)),']'])
+        disp(['Iteration: ',num2str(i-1),', tol = ',num2str(norm(dfnew,inf)),', x = [',num2str(xnew(1)),', ',num2str(xnew(2)),']'])
         
         if Plot2DFunction
             
@@ -107,9 +107,11 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
             
         end
 
-        if norm(df(i,:),inf) < tau
+        if norm(dfnew,inf) < tau
             disp(['Finished after ',num2str(i-1),' iterations.'])
             break
+        else
+            dfold_normalized = dfnew_normalized;
         end
 
     end
@@ -123,16 +125,13 @@ function xnew = linesearch(x, alpha, direction, func)
     
     direction = direction(:); % Force to be a column vector
 
-    for i = 1:1e5
+    for i = 50 % close to maximum precision (8.89 x 10^-16)
         xnew = x + alpha .* direction;
         
         if func(xnew) < func(x)
             return
-        elseif alpha < 1e-9
-            % find steepest descent
-            %[~,direction] = func(x);
-            
-            return
+        elseif func(xnew) == func(x)
+            xnew = 5.*rand(2,1); % Just start somewhere else
         else
             alpha = alpha / 2; % Shrink the step size
         end

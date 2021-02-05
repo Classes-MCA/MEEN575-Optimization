@@ -7,9 +7,11 @@ x0 = [5,3];
 
 [xopt, fopt] = uncon(@quad,x0,1e-6,'Plot2DFunction',true);
 
-[xopt, fopt] = uncon(@rosenbrock,x0,1e-6,'Plot2DFunction',true);
+%x0 = [2,2];
 
-[f,df] = rosenbrock([1,1])
+%[xopt, fopt] = uncon(@rosenbrock,x0,1e-6,'Plot2DFunction',true);
+
+%[f,df] = rosenbrock([1,1])
 
 % Defining the quadratic function
 function  [f,df] = quad(x)
