@@ -43,9 +43,9 @@ Plot2DFunction = p.Results.Plot2DFunction;
 % Plotting the 2-dimensional function, if desired
 if Plot2DFunction
     % Create a plot of the space
-    xpos = -10:0.1:10;
-    ypos = -10:0.1:10;
-    plotSpace(xpos,ypos,func);
+    x1 = -10:0.1:10;
+    x2 = -10:0.1:10;
+    plotSpace(x1,x2,func);
 end
 
 % Forcing x0 to be a column vector
@@ -65,20 +65,26 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
     alpha = 1;
     xhist = x;
     [f(1), df(1,:)] = func(x);
+    
+    df(1,:) = [0,0];
+    
+    %f(1,:) = df(1,:) ./ norm(df(1,:));
 
     for i = 2:1000
     
         [f(i), df(i,:)] = func(x);
     
-        p = 0.9;
+        df(i,:) = df(i,:) ./ norm(df(i,:));
+        
+        p = 0.1;
         direction = -(1-p).*df(i-1,:) - p.*df(i,:);
         xnew = linesearch(x, alpha, direction, func);
-
-        disp(['Iteration: ',num2str(i-1),', x = [',num2str(xnew(1)),', ',num2str(xnew(2)),']'])
 
         deltaX = xnew - x;
         x = xnew;
         xhist = [xhist, x];
+        
+        disp(['Iteration: ',num2str(i-1),', tol = ',num2str(norm(df(i,:),inf)),', x = [',num2str(xnew(1)),', ',num2str(xnew(2)),']'])
         
         if Plot2DFunction
             
@@ -101,7 +107,7 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
             
         end
 
-        if rms(deltaX) < tau
+        if norm(df(i,:),inf) < tau
             disp(['Finished after ',num2str(i-1),' iterations.'])
             break
         end
@@ -117,12 +123,15 @@ function xnew = linesearch(x, alpha, direction, func)
     
     direction = direction(:); % Force to be a column vector
 
-    for i = 1:100
+    for i = 1:1e5
         xnew = x + alpha .* direction;
         
         if func(xnew) < func(x)
             return
-        elseif alpha < 0.01
+        elseif alpha < 1e-9
+            % find steepest descent
+            %[~,direction] = func(x);
+            
             return
         else
             alpha = alpha / 2; % Shrink the step size
@@ -132,14 +141,14 @@ function xnew = linesearch(x, alpha, direction, func)
 
 end
 
-function [h,ax1,ax2] = plotSpace(x,y,func)
+function [h,ax1,ax2] = plotSpace(x1,x2,func)
 
     % Solving for the value at each (x,y) coordinate
-    for i = 1:length(x)
+    for i = 1:length(x1)
         
-        for j = 1:length(y)
+        for j = 1:length(x2)
             
-            vec = [x(i), y(j)];
+            vec = [x1(i), x2(j)];
             [values(i,j),~] = func(vec);
             
         end
@@ -149,20 +158,19 @@ function [h,ax1,ax2] = plotSpace(x,y,func)
     % Creating the plot
     h = figure();
     h.Position = [2 2 15 6];
-    sgtitle('Quadratic Function Convergence',...
+    sgtitle('Function Convergence',...
             'FontWeight','Bold',...
             'FontSize',18);
     
     ax1 = subplot(1,2,1);
-    [X,Y] = meshgrid(x,y);
-    surf(X,Y,values,...
+    [X1,X2] = meshgrid(x1,x2);
+    surf(X1,X2,values,...
          'mesh','none')
     title('Surface View')
     hold on
     
     ax2 = subplot(1,2,2);
-    contour(X,Y,values,...
-            'LevelStep',10.0)
+    contour(X1,X2,values)
     title('Contour View')
     hold on
 
