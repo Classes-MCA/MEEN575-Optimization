@@ -36,6 +36,12 @@ for i = 1:n-1
     vbar = sqrt(h - y(i+1) - mu*x(i+1)) + sqrt(h - y(i) - mu*x(i));
     T = T + ds/vbar;
     
+    % If the result is complex, then make the time large enough that the
+    % optimizer will retreat from that solution.
+    if ~isreal(T)
+        T = 100;
+    end
+    
     % gradient
     if i > 1
         dsdyi = -(y(i+1) - y(i))/ds;

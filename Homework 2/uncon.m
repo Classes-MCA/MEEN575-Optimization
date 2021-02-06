@@ -36,6 +36,7 @@ p.addParameter('Plot2DFunction',false)
 p.addParameter('XLims',[-5,5])
 p.addParameter('YLims',[-5,5])
 p.addParameter('ContourStep',10)
+p.addParameter('PlotPoints',false)
 
 p.parse(func, x0, tau, varargin{:});
 
@@ -43,6 +44,7 @@ Plot2DFunction = p.Results.Plot2DFunction;
 XLims = p.Results.XLims;
 YLims = p.Results.YLims;
 ContourStep = p.Results.ContourStep;
+PlotPoints = p.Results.PlotPoints;
 
 %----- CONTINUING THE FUNCTION -----%   
 
@@ -63,17 +65,19 @@ x0 = x0(:);
 x = transpose(x0); % Making a row vector
 
 % Perform the optimization
-[xopt, fopt] = optimize(x,func,tau,Plot2DFunction);
+[xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints);
 
 
 end
 
-function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
+function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints)
 
     [f(1),pold,~] = getFunctionInfo(x,func); % Starting function value
 
     
-    for i = 2:100
+    for i = 2:2e4
+        
+        visualize(Plot2DFunction,PlotPoints,x,f,i)
         
         [f(i),p,tol] = getFunctionInfo(x(i-1,:),func);
         
@@ -82,13 +86,6 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
         pold = p;
         
         printinfo(i,tol,f(i),x(i,:))
-        
-        if Plot2DFunction
-            
-            plotCurrentStatus(x,f)
-            drawnow()
-            
-        end
         
         if tol < tau
             xopt = x(i,:);
@@ -153,9 +150,11 @@ function printinfo(iteration,tolerance,f,x)
     iteration = num2str(iteration);
     tolerance = num2str(tolerance);
     f = num2str(f);
-    x = ['[',num2str(x(1)),', ',num2str(x(2)),']'];
+    %x = ['[',num2str(x(1)),', ',num2str(x(2)),']'];
 
-    info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f,', x: ',x];
+    %info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f,', x: ',x];
+    
+    info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f];
     
     disp(info)
 
@@ -172,6 +171,37 @@ function plotCurrentStatus(x,f)
             'r.')
 
 end
+
+function createGraph(x)
+    
+    y = x;
+    
+    x = linspace(0,1,length(y)+2);
+    
+    y = [1,y,0];
+
+    plot(x,y)
+
+end
+
+function visualize(Plot2DFunction,PlotPoints,x,f,i)
+
+    if Plot2DFunction
+            
+        plotCurrentStatus(x,f)
+        drawnow()
+
+    end
+
+    if PlotPoints
+
+        createGraph(x(i-1,:))
+        drawnow()
+
+    end
+    
+end
+        
 
 function [h,ax1,ax2] = plotSpace(x1,x2,func,ContourStep)
 
