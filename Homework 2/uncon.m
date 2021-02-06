@@ -70,13 +70,16 @@ end
 
 function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
 
-    f(1) = func(x); % Starting function value
+    [f(1),pold,~] = getFunctionInfo(x,func); % Starting function value
 
+    
     for i = 2:100
         
         [f(i),p,tol] = getFunctionInfo(x(i-1,:),func);
         
-        x(i,:) = getNewPoint(x(i-1,:),p,f(i),func);
+        x(i,:) = getNewPoint(x(i-1,:),p,f(i),func,pold);
+        
+        pold = p;
         
         printinfo(i,tol,f(i),x(i,:))
         
@@ -87,11 +90,16 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction)
             
         end
         
+        if tol < tau
+            xopt = x(i,:);
+            fopt = f(i);
+            return
+        end
+        
     end
     
-    xopt = 0;
-    fopt = 0;
-
+    
+    
 end
 
 function [f,p,tol] = getFunctionInfo(x,func)
@@ -105,20 +113,24 @@ function [f,p,tol] = getFunctionInfo(x,func)
 
 end
 
-function xnew = getNewPoint(x,p,fold,func)
+function xnew = getNewPoint(x,pnew,fold,func,pold)
     
     x = x(:); % Make column vector
 
     alpha = 10;
     
-    gradientAmounts = 0:0.1:1; % Different amounts of the direction to try
+    gradientAmounts = 0.5:0.1:1; % Different amounts of the direction to try
     
-    for i = 0:0.1:1
+    for i = 1:length(gradientAmounts)
         
+        w = gradientAmounts(i); % Weighting factor
         
+        % If w = 0, then the new direction is ignored,
+        % if w = 1, then the old direction is ignored
+        p_weighted = (1-w)*pold + w*pnew;
     
         for j = 1:50
-            xnew = x + alpha*p; % Get new x value
+            xnew = x + alpha*p_weighted; % Get new x value
 
             fnew = func(xnew); % See what the function value is there
 
@@ -126,6 +138,7 @@ function xnew = getNewPoint(x,p,fold,func)
                 alpha = alpha / 2; % If the new function value is too big,
                                    % make alpha smaller
             else
+                % If the new value is less than the old value, return.
                 return
             end
         end
