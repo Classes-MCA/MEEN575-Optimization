@@ -37,6 +37,7 @@ p.addParameter('XLims',[-5,5])
 p.addParameter('YLims',[-5,5])
 p.addParameter('ContourStep',10)
 p.addParameter('PlotPoints',false)
+p.addParameter('MakeGIF',false)
 
 p.parse(func, x0, tau, varargin{:});
 
@@ -45,6 +46,7 @@ XLims = p.Results.XLims;
 YLims = p.Results.YLims;
 ContourStep = p.Results.ContourStep;
 PlotPoints = p.Results.PlotPoints;
+MakeGIF = p.Results.MakeGIF;
 
 %----- CONTINUING THE FUNCTION -----%   
 
@@ -65,19 +67,19 @@ x0 = x0(:);
 x = transpose(x0); % Making a row vector
 
 % Perform the optimization
-[xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints);
+[xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF);
 
 
 end
 
-function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints)
+function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF)
 
     [f(1),pold,~] = getFunctionInfo(x,func); % Starting function value
 
     
     for i = 2:2e4
         
-        visualize(Plot2DFunction,PlotPoints,x,f,i)
+        visualize(Plot2DFunction,PlotPoints,x,f,i,MakeGIF);
         
         [f(i),p,tol] = getFunctionInfo(x(i-1,:),func);
         
@@ -116,7 +118,7 @@ function xnew = getNewPoint(x,pnew,fold,func,pold)
 
     alpha = 10;
     
-    gradientAmounts = 0.5:0.1:1; % Different amounts of the direction to try
+    gradientAmounts = 0.5:0.1:1.0; % Different amounts of the direction to try
     
     for i = 1:length(gradientAmounts)
         
@@ -126,7 +128,7 @@ function xnew = getNewPoint(x,pnew,fold,func,pold)
         % if w = 1, then the old direction is ignored
         p_weighted = (1-w)*pold + w*pnew;
     
-        for j = 1:50
+        for j = 1:20
             xnew = x + alpha*p_weighted; % Get new x value
 
             fnew = func(xnew); % See what the function value is there
@@ -181,27 +183,48 @@ function createGraph(x)
     y = [1,y,0];
 
     plot(x,y)
+    title('Brachistochrone Problem')
+    xlabel('X (m)')
+    ylabel('Y (m)')
 
 end
 
-function visualize(Plot2DFunction,PlotPoints,x,f,i)
+function visualize(Plot2DFunction,PlotPoints,x,f,i,MakeGIF)
 
     if Plot2DFunction
             
         plotCurrentStatus(x,f)
         drawnow()
 
-    end
-
-    if PlotPoints
+    elseif PlotPoints
 
         createGraph(x(i-1,:))
         drawnow()
-
+        
+    end
+    
+    if MakeGIF
+        createGIF(i)
     end
     
 end
         
+function createGIF(i)
+
+    frame = getframe(gcf);
+    im = frame2im(frame);
+    [imind,cm] = rgb2ind(im,256);
+    
+    filename = "OptimizationGIF.gif";
+    
+    % Write to the GIF File 
+    if i == 2 
+        imwrite(imind,cm,filename,'gif', 'DelayTime',1/96, 'Loopcount',inf); 
+    else 
+        imwrite(imind,cm,filename,'gif', 'DelayTime',1/96,'WriteMode','append'); 
+    end 
+
+end
 
 function [h,ax1,ax2] = plotSpace(x1,x2,func,ContourStep)
 

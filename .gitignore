@@ -5,3 +5,5 @@ __pycache__/*
 *.svg
 *.eps*
 *.m~
+*.gif
+
