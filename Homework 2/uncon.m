@@ -69,31 +69,51 @@ x0 = x0(:);
 x = transpose(x0); % Making a row vector
 
 % Perform the optimization
-[xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF,FrameRate);
+[xopt, fopt, funcCalls, tol] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF,FrameRate);
 
+figure()
+subplot(1,2,1)
+plot(tol)
+title('Linear Axes')
+xlabel('Iterations')
+ylabel('||\nablaf||_{\infty}')
+grid on
+
+subplot(1,2,2)
+loglog(tol)
+title('Logarithmic Axes')
+xlabel('Iterations')
+ylabel('||\nablaf||_{\infty}')
+grid on
+
+sgtitle('Convergence of ||\nablaf||_{\infty}')
 
 end
 
-function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF,FrameRate)
+function [xopt, fopt, funcCalls, tol] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF,FrameRate)
 
-    [~,pold,~] = getFunctionInfo(x,func); % Starting function value
+    funcCalls = 0;
+
+    [~,pold,~] = getFunctionInfo(x,func,funcCalls); % Starting function value
+    
+    funcCalls = funcCalls + 1;
 
     
     for i = 1:2e4
         
-        [f(i),p,tol] = getFunctionInfo(x(i,:),func);
+        [f(i),p,tol(i), funcCalls] = getFunctionInfo(x(i,:),func, funcCalls);
         
-        printinfo(i,tol,f(i),x(i,:))
+        printinfo(i,tol,f(i),x(i,:),funcCalls)
         
         visualize(Plot2DFunction,PlotPoints,x,f,i,MakeGIF,FrameRate);
         
-        if tol < tau
+        if tol(i) < tau
             xopt = x(i,:);
             fopt = f(i);
             return
         end
         
-        x(i+1,:) = getNewPoint(x(i,:),p,f(i),func,pold);
+        [x(i+1,:),funcCalls] = getNewPoint(x(i,:),p,f(i),func,pold,funcCalls);
         
         pold = p;
         
@@ -103,9 +123,11 @@ function [xopt, fopt] = optimize(x,func,tau,Plot2DFunction,PlotPoints,MakeGIF,Fr
     
 end
 
-function [f,p,tol] = getFunctionInfo(x,func)
+function [f,p,tol, funcCalls] = getFunctionInfo(x,func, funcCalls)
 
     [f,df] = func(x); % Get function and gradient values
+    
+    funcCalls = funcCalls + 1;
     
     p = - df ./ norm(df); % Normalize the gradient to get the direction
     
@@ -114,7 +136,7 @@ function [f,p,tol] = getFunctionInfo(x,func)
 
 end
 
-function xnew = getNewPoint(x,pnew,fold,func,pold)
+function [xnew,funcCalls] = getNewPoint(x,pnew,fold,func,pold,funcCalls)
     
     x = x(:); % Make column vector
 
@@ -134,6 +156,8 @@ function xnew = getNewPoint(x,pnew,fold,func,pold)
             xnew = x + alpha*p_weighted; % Get new x value
 
             fnew = func(xnew); % See what the function value is there
+            
+            funcCalls = funcCalls + 1;
 
             if fnew > fold
                 alpha = alpha / 2; % If the new function value is too big,
@@ -149,16 +173,17 @@ function xnew = getNewPoint(x,pnew,fold,func,pold)
 
 end
 
-function printinfo(iteration,tolerance,f,x)
+function printinfo(iteration,tolerance,f,x,funcCalls)
     
     iteration = num2str(iteration);
     tolerance = num2str(tolerance);
+    functionCalls = num2str(funcCalls);
     f = num2str(f);
     %x = ['[',num2str(x(1)),', ',num2str(x(2)),']'];
 
     %info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f,', x: ',x];
     
-    info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f];
+    info = ['Iteration: ',iteration,', Tolerance: ',tolerance,', ','f(x): ',f,', Function Calls: ',functionCalls];
     
     disp(info)
 
