@@ -55,6 +55,7 @@ yopt = [1, yopt, 0];
 yopt_pro = [1, yopt_pro, 0];
 
 %%
+figure()
 plot(x,yopt,'LineWidth',4,'Color',[0 1 0]); hold on
 plot(x,yopt_pro,'LineStyle','--','Color',[1 0 0])
 title('Brachistochrone Problem')

@@ -73,15 +73,15 @@ x = transpose(x0); % Making a row vector
 
 figure()
 subplot(1,2,1)
-plot(tol)
-title('Linear Axes')
+semilogy(tol)
+title('Semilogy Axes')
 xlabel('Iterations')
 ylabel('||\nablaf||_{\infty}')
 grid on
 
 subplot(1,2,2)
 loglog(tol)
-title('Logarithmic Axes')
+title('Log-log Axes')
 xlabel('Iterations')
 ylabel('||\nablaf||_{\infty}')
 grid on
