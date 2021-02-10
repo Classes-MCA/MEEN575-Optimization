@@ -2,11 +2,12 @@ clear; close all;
 usePackage GeneralSignalProcessing
 plotStyle('StandardStyle','SonicBoom')
 
-options = optimoptions(@fminunc,'Display','iter-detailed');
+options = optimoptions(@fminunc,'Display','iter-detailed',...
+                                'MaxFunctionEvaluations',500e3);
 
 %% Quadratic Function
 % Creating an intial guess
-x0 = [-4,10];
+x0 = [0,0];
 
 [xopt, fopt] = uncon(@quad,x0,1e-6,...
                'Plot2DFunction',true,...
@@ -15,12 +16,14 @@ x0 = [-4,10];
                'MakeGif',false,...
                'FrameRate',2.5)
            
-sgtitle('Convergence of ||\nablaf||_{\infty} for Quadratic Function')
+sgtitle('Convergence of |\nablaf|_{\infty} for Quadratic Function',...
+        'FontWeight','Bold',...
+        'FontSize',20)
            
 [xopt_pro, fopt_pro] = fminunc(@quad,x0,options)
 
 %% Rosenbrock Function
-x0 = [-1,-1];
+x0 = [1.5,2];
 
 [xopt, fopt] = uncon(@rosenbrock,x0,1e-6,...
                      'Plot2DFunction',true,...
@@ -30,24 +33,28 @@ x0 = [-1,-1];
                      'MakeGif',false,...
                      'FrameRate',2.5);
                  
-sgtitle('Convergence of ||\nablaf||_{\infty} for Rosenbrock Function')
+sgtitle('Convergence of |\nablaf|_{\infty} for Rosenbrock Function',...
+        'FontWeight','Bold',...
+        'FontSize',20)
                  
 [xopt_pro, fopt_pro] = fminunc(@rosenbrock,x0,options)
 
 %% Brachistochrone Problem
-interiorPoints = 20;
+interiorPoints = 58;
 x = linspace(0,1,interiorPoints + 2);
-% y0 = cos(6*pi.*x(2:end-1)).^2 .* 0.5;
-y0 = linspace(0.9,0.1,interiorPoints);
+y0 = cos(6*pi.*x(2:end-1)).^2 .* 0.5;
+%y0 = linspace(0.9,0.1,interiorPoints);
 % y0 = ones(interiorPoints,1) - 0.5;
 
 %figure()
 [yopt, fopt] = uncon(@brachistochrone,y0,1e-6,...
-                     'PlotPoints',false,...
-                     'MakeGIF',false,...
+                     'PlotPoints',true,...
+                     'MakeGIF',true,...
                      'FrameRate',24);
 
-sgtitle('Convergence of ||\nablaf||_{\infty} for Brachistochrone Problem')
+sgtitle('Convergence of |\nablaf|_{\infty} for Brachistochrone Function',...
+        'FontWeight','Bold',...
+        'FontSize',20)
                  
 [yopt_pro, fopt_pro] = fminunc(@brachistochrone,y0,options)
                  
@@ -56,11 +63,15 @@ yopt_pro = [1, yopt_pro, 0];
 
 %%
 figure()
-plot(x,yopt,'LineWidth',4,'Color',[0 1 0]); hold on
-plot(x,yopt_pro,'LineStyle','--','Color',[1 0 0])
-title('Brachistochrone Problem')
-xlabel('X (m)')
-ylabel('Y (m)')
+plot(x,yopt,'LineWidth',8,'Color',[0 1 0]); hold on
+plot(x,yopt_pro,'LineWidth',4,'LineStyle','--','Color',[1 0 0])
+title('Brachistochrone Problem','FontSize',20)
+xlabel('X (m)','FontSize',18)
+ylabel('Y (m)','FontSize',18)
+set(gcf,'Position',[2,2,10,6])
+hleg = legend('Uncon','Fminunc','Location','NorthEast');
+hleg.FontSize = 14;
+hleg.Title.String = 'Optimizer';
 
 %% Functions
 % Defining the quadratic function

@@ -74,19 +74,23 @@ x = transpose(x0); % Making a row vector
 figure()
 subplot(1,2,1)
 semilogy(tol)
-title('Semilogy Axes')
-xlabel('Iterations')
-ylabel('||\nablaf||_{\infty}')
+title('Semilogy Axes','FontSize',15)
+xlabel('Iterations','FontSize',14)
+ylabel('||\nablaf||_{\infty}','FontSize',14)
+xlim([0,length(tol)])
 grid on
 
 subplot(1,2,2)
 loglog(tol)
-title('Log-log Axes')
-xlabel('Iterations')
-ylabel('||\nablaf||_{\infty}')
+title('Log-log Axes','FontSize',15)
+xlabel('Iterations','FontSize',14)
+ylabel('||\nablaf||_{\infty}','FontSize',14)
+xlim([0,length(tol)])
 grid on
 
-sgtitle('Convergence of ||\nablaf||_{\infty}')
+sgtitle('Convergence of ||\nablaf||_{\infty}','FontSize',22)
+
+set(gcf,'Position',[2,2,10,6])
 
 end
 
@@ -103,7 +107,7 @@ function [xopt, fopt, funcCalls, tol] = optimize(x,func,tau,Plot2DFunction,PlotP
         
         [f(i),p,tol(i), funcCalls] = getFunctionInfo(x(i,:),func, funcCalls);
         
-        printinfo(i,tol,f(i),x(i,:),funcCalls)
+        printinfo(i,tol(i),f(i),x(i,:),funcCalls)
         
         visualize(Plot2DFunction,PlotPoints,x,f,i,MakeGIF,FrameRate);
         
@@ -118,8 +122,6 @@ function [xopt, fopt, funcCalls, tol] = optimize(x,func,tau,Plot2DFunction,PlotP
         pold = p;
         
     end
-    
-    
     
 end
 
@@ -285,23 +287,23 @@ function [h,ax1,ax2] = plotSpace(x1,x2,func,ContourStep)
     % Creating the plot
     h = figure();
     h.Position = [2 2 15 6];
-    sgtitle('Function Convergence',...
+    sgtitle('Visual Convergence',...
             'FontWeight','Bold',...
-            'FontSize',18);
+            'FontSize',22);
     
     ax1 = subplot(1,2,1);
     [X1,X2] = meshgrid(x1,x2);
     surf(X1,X2,values,...
          'mesh','none')
     title('Surface View',...
-          'FontSize',14)
+          'FontSize',16)
     hold on
     
     ax2 = subplot(1,2,2);
     contour(X1,X2,values,...
             'LevelStep',ContourStep)
     title('Contour View',...
-          'FontSize',14)
+          'FontSize',16)
     hold on
 
 end
