@@ -1,4 +1,4 @@
-function [mass, stress] = truss(A)
+function output = truss(A)
 %{
 Computes mass and stress for the 10-bar truss structure
 Parameters
@@ -88,6 +88,9 @@ d = K\F;
 
 % compute stress
 stress = S*d;
+
+output.mass = mass;
+output.stress = stress;
 
 end
 

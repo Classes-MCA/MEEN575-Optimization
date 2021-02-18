@@ -1,9 +1,9 @@
 function [xopt, fopt, exitflag, output] = optimizederiv()
 
     % -------- starting point and bounds ----------
-    x0 = [];
+    x0 = ones(10,1);
     ub = [];
-    lb = 0.1.*ones(10,1);
+    lb = 0.1*ones(10,1);
     % ---------------------------------------------
 
     % ------ linear constraints ----------------
@@ -26,19 +26,23 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         
         % Interpretation
         % f: the mass from the truss() function
-        [mass,stress] = truss(x);
-        f = mass;
+        truss_output = truss(x);
+        f = truss_output.mass;
         
         % g: inequality constraints, see first homework. Should be almost
         % exactly the same, if not exactly.
-        g(1:10) = stress.^2 - maxStress^2;
-        g(9) = stress(9)^2 - 75e3^2; % special condition
+        trusscon_output = trusscon(x);
+        g = trusscon_output.constraints;
         
         % h: equality constraints, see first homework. There are none for
         % this homework
         h = [];
         
         % df: simple derivative
+        J = getJacobian(@truss,x,...
+                        'Method','Complex-Step');
+                    
+        df = J(1).output;           
         
         % dg: Jacobian of g. Finite difference the truss function again,
         % and then get the J_g at each point in the Jacobian.
@@ -50,6 +54,9 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % homework is to create this super generalized Jacobian function
         % for any function. This will work for finite differencing and
         % complex step, but not the others.
+        J = getJacobian(@trusscon,x,...
+                        'Method','Complex-Step');
+        dg = J(1).output;
         
         % dh: Jacobian of h, which is nothing for this particular case.
         dh = [];
@@ -60,7 +67,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
     % ----------- options ----------------------------
     options = optimoptions('fmincon', ...
         'Algorithm', 'active-set', ...  % choose one of: 'interior-point', 'sqp', 'active-set', 'trust-region-reflective'
-        'HonorBounds', 'bounds', ...  % forces optimizer to always satisfy bounds at each iteration
+        'HonorBounds', true, ...  % forces optimizer to always satisfy bounds at each iteration
         'Display', 'iter-detailed', ...  % display more information
         'MaxIterations', 1000, ...  % maximum number of iterations
         'MaxFunctionEvaluations', 10000, ...  % maximum number of function calls
@@ -69,7 +76,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         'FiniteDifferenceType', 'forward', ...  % if finite differencing, can also use central
         'SpecifyObjectiveGradient', true, ...  % supply gradients of objective
         'SpecifyConstraintGradient', true, ...  % supply gradients of constraints
-        'CheckGradients', true, ...  % true if you want to check your supplied gradients against finite differencing
+        'CheckGradients', false, ...  % true if you want to check your supplied gradients against finite differencing
         'Diagnostics', 'on');  % display diagnotic information
     % -------------------------------------------
 
