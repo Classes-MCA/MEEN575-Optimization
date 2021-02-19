@@ -6,9 +6,9 @@ function output = trusscon(x)
     
     stress = trussoutput.stress;
 
-    g(1:10,1) = abs(stress) - abs(maxStress);
-    g(9) = abs(stress(9)) - abs(75e3); % special condition
+    g(1:10,1) = stress.^2 - maxStress.^2;
+    g(9) = stress(9)^2 - 75e3^2; % special condition
     
-    output.constraints = g;
+    output.constraints = g/1000;
 
 end

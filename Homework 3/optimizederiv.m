@@ -2,7 +2,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
 
     % -------- starting point and bounds ----------
     x0 = ones(10,1);
-    ub = [];
+    ub = [];%100*ones(10,1);
     lb = 0.1*ones(10,1);
     % ---------------------------------------------
 
@@ -40,7 +40,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         
         % df: simple derivative
         J = getJacobian(@truss,x,...
-                        'Method','Complex-Step');
+                        'Method','Finite-Difference');
                     
         df = J(1).output;           
         
@@ -55,7 +55,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % for any function. This will work for finite differencing and
         % complex step, but not the others.
         J = getJacobian(@trusscon,x,...
-                        'Method','Complex-Step');
+                        'Method','Finite-Difference');
         dg = J(1).output;
         
         % dh: Jacobian of h, which is nothing for this particular case.
@@ -73,7 +73,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         'MaxFunctionEvaluations', 10000, ...  % maximum number of function calls
         'OptimalityTolerance', 1e-6, ...  % convergence tolerance on first order optimality
         'ConstraintTolerance', 1e-6, ...  % convergence tolerance on constraints
-        'FiniteDifferenceType', 'forward', ...  % if finite differencing, can also use central
+        'FiniteDifferenceType', 'central', ...  % if finite differencing, can also use central
         'SpecifyObjectiveGradient', true, ...  % supply gradients of objective
         'SpecifyConstraintGradient', true, ...  % supply gradients of constraints
         'CheckGradients', false, ...  % true if you want to check your supplied gradients against finite differencing

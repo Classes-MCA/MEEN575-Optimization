@@ -43,6 +43,9 @@ function J = getJacobian(func,x,varargin)
                 
             elseif strcmp(lower(Method),lower('Complex-Step'))
                 
+                % Define small step size
+                h = 1e-30;
+                
                 % Do a central-difference
                 x_step = x;
                 x_step(i) = x_step(i) + 1j*h;
@@ -56,9 +59,9 @@ function J = getJacobian(func,x,varargin)
                     
                     step = eval(['output_step.',output_vars{k}]);
                     
-                    deriv = step/h;
+                    deriv = imag(step)/h;
                     
-                    J(k).output(i,:) = deriv;
+                    J(k).output(i,:) = -deriv;
                     
                 end
 
