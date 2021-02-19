@@ -45,7 +45,7 @@ end
 mass = sum(rho.*A.*L);
 
 % assemble global matricies
-K = zeros(DOF*n, DOF*n);
+K = A(1)*zeros(DOF*n, DOF*n);
 S = zeros(nbar, DOF*n);
 
 for i = 1:nbar  % loop through each bar

@@ -65,6 +65,28 @@ function J = getJacobian(func,x,varargin)
                     
                 end
 
+            elseif strcmp(lower(Method),lower('AD'))
+                
+                if i > 1
+                    x = x{0}; % Convert back to double by taking only
+                              % zeroth-order derivatives
+                end
+                
+                x = amatinit(x);
+                output_AD = func(x);
+                
+                output_vars = fieldnames(output_AD);
+                
+                % Create a Jacobian for each function output
+                for k = 1:length(output_vars)
+                    
+                    value = eval(['output_AD.',output_vars{k}]);
+                    
+                    jacobian = ajac(value);
+                    
+                    J(k).output = jacobian{0};
+                    
+                end
                 
             end
         

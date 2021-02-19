@@ -2,7 +2,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
 
     % -------- starting point and bounds ----------
     x0 = ones(10,1);
-    ub = [];%100*ones(10,1);
+    ub = 10*ones(10,1);
     lb = 0.1*ones(10,1);
     % ---------------------------------------------
 
@@ -25,7 +25,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % d*: derivatives of * (see fmincon docs for index ordering)
         
         % Derivative Method
-        method = 'Complex-Step';
+        method = 'AD';
         
         % Interpretation
         % f: the mass from the truss() function
