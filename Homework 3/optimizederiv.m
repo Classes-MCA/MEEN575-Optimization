@@ -24,6 +24,9 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % h: equality constraints
         % d*: derivatives of * (see fmincon docs for index ordering)
         
+        % Derivative Method
+        method = 'Complex-Step';
+        
         % Interpretation
         % f: the mass from the truss() function
         truss_output = truss(x);
@@ -40,7 +43,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         
         % df: simple derivative
         J = getJacobian(@truss,x,...
-                        'Method','Finite-Difference');
+                        'Method',method);
                     
         df = J(1).output;           
         
@@ -55,7 +58,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % for any function. This will work for finite differencing and
         % complex step, but not the others.
         J = getJacobian(@trusscon,x,...
-                        'Method','Finite-Difference');
+                        'Method',method);
         dg = J(1).output;
         
         % dh: Jacobian of h, which is nothing for this particular case.
