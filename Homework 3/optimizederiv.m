@@ -47,16 +47,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
                     
         df = J(1).output;           
         
-        % dg: Jacobian of g. Finite difference the truss function again,
-        % and then get the J_g at each point in the Jacobian.
-        % Create a function outside of optimizederiv called
-        % 'getJacobian()'.
-        % Within that function, say f(x, g(x)). If you generalize this
-        % well, then you can use the same function to get any Jacobian for
-        % any function. Know the number of outputs of g(x). Part 1 of the
-        % homework is to create this super generalized Jacobian function
-        % for any function. This will work for finite differencing and
-        % complex step, but not the others.
+        % dg: Jacobian of g.
         J = getJacobian(@trusscon,x,...
                         'Method',method);
         dg = J(1).output;

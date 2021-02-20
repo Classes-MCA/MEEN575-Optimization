@@ -40,7 +40,7 @@ nbar = length(A);  % number of bars
 
 % compute mass
 if iscolumn(A)
-    A = A';
+    A = A.';
 end
 mass = sum(rho.*A.*L);
 

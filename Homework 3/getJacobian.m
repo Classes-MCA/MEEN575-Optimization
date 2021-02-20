@@ -61,7 +61,7 @@ function J = getJacobian(func,x,varargin)
                     
                     deriv = imag(step)/h;
                     
-                    J(k).output(i,:) = -deriv;
+                    J(k).output(i,:) = deriv;
                     
                 end
 
@@ -84,7 +84,7 @@ function J = getJacobian(func,x,varargin)
                     
                     jacobian = ajac(value);
                     
-                    J(k).output = jacobian{0};
+                    J(k).output = transpose(jacobian{0});
                     
                 end
                 
