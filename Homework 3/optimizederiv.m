@@ -14,6 +14,10 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
     Aeq = [];
     beq = [];
     % ------------------------------------------
+    
+    % Counting the number of function calls
+    global funcCount
+    funcCount = 0;
 
     % ---- Objective and Constraints -------------
     function [f, g, h, df, dg, dh] = objcon(x)
@@ -25,11 +29,11 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         % d*: derivatives of * (see fmincon docs for index ordering)
         
         % Derivative Method
-        method = 'AD';
+        method = 'Complex-Step';
         
         % Interpretation
         % f: the mass from the truss() function
-        truss_output = truss(x);
+        truss_output = truss(x); funcCount = funcCount + 1;
         f = truss_output.mass;
         
         % g: inequality constraints, see first homework. Should be almost
@@ -71,8 +75,21 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
         'SpecifyObjectiveGradient', true, ...  % supply gradients of objective
         'SpecifyConstraintGradient', true, ...  % supply gradients of constraints
         'CheckGradients', false, ...  % true if you want to check your supplied gradients against finite differencing
-        'Diagnostics', 'on');  % display diagnotic information
+        'Diagnostics', 'on',... % display diagnotic information
+        'OutputFcn',@outfun);
     % -------------------------------------------
+    
+    opt = [];
+    funcCallCount = [];
+    
+    % Creating an output function
+    function stop = outfun(x,optimValues,state)
+        opt = [opt;optimValues.firstorderopt];
+        if ~isempty(optimValues.firstorderopt)
+            funcCallCount = [funcCallCount;funcCount];
+        end
+        stop = false; % you can set your own stopping criteria
+    end
 
 
     % -- NOTE: no need to change anything below) --
@@ -122,4 +139,7 @@ function [xopt, fopt, exitflag, output] = optimizederiv()
     % call fmincon
     [xopt, fopt, exitflag, output] = fmincon(@obj, x0, A, b, Aeq, beq, lb, ub, @con, options);
 
+    output.opt = opt;
+    output.funcCallCount = funcCallCount;
+    
 end

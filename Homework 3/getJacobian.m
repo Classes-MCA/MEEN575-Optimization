@@ -1,4 +1,6 @@
 function J = getJacobian(func,x,varargin)
+    
+    tic; % Start counting time
 
     p = inputParser;
     p.addRequired('func');
@@ -14,6 +16,8 @@ function J = getJacobian(func,x,varargin)
     inputNum = length(x);
     outputNum = nargout(func);
     
+    global funcCount % Use this variable here too
+    
     for i = 1:inputNum
             
             if strcmp(lower(Method),lower('Finite-Difference'))
@@ -24,8 +28,8 @@ function J = getJacobian(func,x,varargin)
                 x_forward(i) = x_forward(i) + h/2;
                 x_backward(i) = x_backward(i) - h/2;
                 
-                output_forward = func(x_forward);
-                output_backward = func(x_backward);
+                output_forward = func(x_forward); funcCount = funcCount + 1;
+                output_backward = func(x_backward); funcCount = funcCount + 1;
                 
                 output_vars = fieldnames(output_forward);
                 
@@ -50,7 +54,7 @@ function J = getJacobian(func,x,varargin)
                 x_step = x;
                 x_step(i) = x_step(i) + 1j*h;
                 
-                output_step = func(x_step);
+                output_step = func(x_step); funcCount = funcCount + 1;
                 
                 output_vars = fieldnames(output_step);
                 
@@ -73,7 +77,7 @@ function J = getJacobian(func,x,varargin)
                 end
                 
                 x = amatinit(x);
-                output_AD = func(x);
+                output_AD = func(x); funcCount = funcCount + 1;
                 
                 output_vars = fieldnames(output_AD);
                 
@@ -91,6 +95,8 @@ function J = getJacobian(func,x,varargin)
             end
         
     end
+    
+    J(3).output = toc; % Finish counting time
 
 end
 
