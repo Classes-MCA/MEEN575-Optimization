@@ -2,7 +2,7 @@ usePackage GeneralSignalProcessing
 clear; close all; plotStyle()
 
 
-n = 30;
+n = 6;
 startingPoint = [0,1];
 endingPoint   = [1,0];
 y0 = flip(0:1/n:1);

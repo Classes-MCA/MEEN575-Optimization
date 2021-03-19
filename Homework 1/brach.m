@@ -11,7 +11,7 @@ function f = brach(y)
     deltaX = (endingPoint(1) - startingPoint(1)) / n;
     x = startingPoint(1):deltaX:endingPoint(1);
     h = startingPoint(2) - endingPoint(2);
-    mu = 0.00;
+    mu = 0.30;
     f = 0;
     
     for i = 1:n-1
